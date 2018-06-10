@@ -4,11 +4,13 @@
   tags: wordpress
 
 - name: Wordpress | Extract archive
-  command: /bin/tar xvf latest.tar.gz -C /var/www/ --strip 1
+  sudo: yes
+  command: /bin/tar xvf latest.tar.gz -C /var/www/html/ --strip 1
   tags: wordpress
 
 - name: Wordpress | Create the wordpress database
-  mysql_db: login_user={{mysql_user}} login_password={{mysql_password}} name={{wordpress_database}} state=present
+  sudo: yes
+  mysql_db: login_user={{mysql_user}} login_password={{mysql_password}} name={{wordpress_database}} state=present config_file=/etc/mysql/my.cnf
   tags: wordpress
 
 - name: Wordpress | Fetch random salts for Wordpress config
@@ -17,11 +19,13 @@
   tags: wordpress 
 
 - name: Wordpress | Create Wordpress database user
+  sudo: yes
   mysql_user: login_user={{mysql_user}} login_password={{mysql_password}} name={{ wordpress_database_user }} password={{ wordpress_database_password }} priv={{ wordpress_database }}.*:ALL host='localhost' state=present
   tags: wordpress
 
 - name: Wordpress | Copy Wordpress config file
-  template: src=wp-config.php dest=/var/www/
+  sudo: yes
+  template: src=wp-config.php dest=/var/www/html/
   tags: wordpress
 
 - name: Wordpress | Give ownership to apache user

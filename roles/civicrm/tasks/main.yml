@@ -1,34 +1,50 @@
 ---
-- name: CiviCRM | Install unzip for plugin
+- name: CiviCRM | Install CiviCRM Runtime Dependencies
   sudo: yes
-  apt: pkg=unzip
+  apt:
+    pkg: "{{item}}"
+  with_items: 
+  - unzip
+  - curl
   tags: civi
 
-- name: CiviCRM | Download wordpress plugin
-  command: wget http://downloads.sourceforge.net/project/civicrm/civicrm-stable/{{ civicrm_version }}/civicrm-{{ civicrm_version }}-wordpress.zip
-  tags: civi
-
-- name: CiviCRM | Extract plugin
-  command: unzip civicrm-{{ civicrm_version }}-wordpress.zip -d /var/www/wp-content/plugins 
+- name: CiviCRM | Download and Extract plugin
+  sudo: yes
+  unarchive: 
+    src: "http://downloads.sourceforge.net/project/civicrm/civicrm-stable/{{ civicrm_version }}/civicrm-{{ civicrm_version }}-wordpress.zip"
+    remote_src: yes
+    dest: /var/www/html/wp-content/plugins 
+    owner: www-data
+    group: www-data
   tags: civi
 
 - name: CiviCRM | Create the civicrm database
-  mysql_db: login_user={{mysql_user}} login_password={{mysql_password}} name={{civicrm_database}} state=present
+  sudo: yes
+  mysql_db: 
+    login_user: "{{mysql_user}}"
+    login_password: "{{mysql_password}}"
+    name: "{{civicrm_database}}"
+    state: present
   tags: civi
 
 - name: CiviCRM | Create civicrm database user
+  sudo: yes
   mysql_user: login_user={{mysql_user}} login_password={{mysql_password}} name={{ civicrm_database_user }} password={{ civicrm_database_password }} priv={{ civicrm_database }}.*:ALL host='localhost' state=present
   tags: civi
 
 - name: CiviCRM | Create files directory
-  command: chdir=/var/www/wp-content/plugins/ mkdir files
-  tags: civi
-
-- name: CiviCRM | Make files directory writeable
-  command: chdir=/var/www/wp-content/plugins/ chmod 777 files
-  tags: civi
-
-- name: CiviCRM | Give ownership of new files to web user
   sudo: yes
-  shell: chdir=/var/www/wp-content/plugins/ chown -R www-data:www-data *
+  file:
+    path: /var/www/html/wp-content/plugins/files
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: u+rwx,go-rwx
   tags: civi
+
+- name: CiviCRM | Make PHP Files Executable
+  command: find /var/www/html/wp-content/plugins/civicrm -name *.php -exec chmod -c 0700 {} \;
+  register: chmod_result
+  changed_when: "chmod_result.stdout != \"\""
+  tags: civi
+

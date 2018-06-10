@@ -1,22 +1,15 @@
 ---
-- name: PHP | Install latest php5
+- name: PHP | Install PHP and dependencies
   sudo: yes
-  apt: pkg=php5
-  tags: php
-
-- name: PHP | Install php5 apache support
-  sudo: yes
-  apt: pkg=libapache2-mod-php5
-  tags: php
-
-- name: PHP | Install php5 mcrypt support
-  sudo: yes
-  apt: pkg=php5-mcrypt
-  tags: php
-
-- name: PHP | Install php5 gd support
-  sudo: yes
-  apt: pkg=php5-gd
+  apt: 
+    pkg: "{{ item }}"
+  with_items:
+  - php
+  - libapache2-mod-php
+  - php-mcrypt
+  - php-gd
+  - php-xml
+  - php-curl
   tags: php
 
 - name: PHP | Restart server after PHP config
