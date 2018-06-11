@@ -1,7 +1,6 @@
 ---
 - hosts: all
-  user: root
-
+  user: gkt
   roles:
     - common
     - apache
@@ -9,3 +8,5 @@
     - php
     - wordpress
     - civicrm
+    - aa_extensions
+    - provision

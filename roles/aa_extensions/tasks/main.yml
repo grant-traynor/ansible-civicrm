@@ -1,0 +1,38 @@
+---
+
+- name: CiviCRM | Install Extension Dependencies
+  sudo: yes
+  apt:
+    pkg: "{{item}}"
+  with_items: 
+  - git
+  tags:
+  - civicrm_extensions
+
+- name: CiviCRM Extensions | Deploy AA Membership ID Allocator
+  become: yes
+  become_method: sudo
+  git:
+    repo: https://github.com/grant-traynor/CiviCRM_MembershipID.git
+    dest: "{{civicrm_ext_dir}}/CiviCRM_MembershipID/"
+    version: master
+  tags:
+  - civicrm_extensions
+
+- name: CiviCRM Extensions | Set Extensions Ownership
+  become: yes
+  become_method: sudo
+  command: find {{civicrm_ext_dir}}/ -exec chown www-data:www-data {} \;
+  register: chown_result
+  changed_when: "chown_result.stdout != \"\""
+  tags:
+  - civicrm_extensions
+
+- name: CiviCRM Extensions | Set PHP File Execute Permissions
+  become: yes
+  become_method: sudo
+  command: find {{civicrm_ext_dir}} -name *.php -exec chmod -c 0700 {} \;
+  register: chmod_result
+  changed_when: "chmod_result.stdout != \"\""
+  tags:
+  - civicrm_extensions

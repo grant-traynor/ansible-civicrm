@@ -9,3 +9,9 @@ civicrm_version: 5.2.0
 civicrm_database: civicrm
 civicrm_database_user: civiuser
 civicrm_database_password: civipass
+
+civicrm_ext_dir: /var/www/html/wp-content/plugins/civicrm/civicrm/ext
+
+wordpress_backup_file: WordpressDbBackup20180608.sql
+civicrm_backup_file: CiviCrmDbBackup20180608.sql
+civicrm_media_backup_file: CiviCrmPhotos20180608.tgz

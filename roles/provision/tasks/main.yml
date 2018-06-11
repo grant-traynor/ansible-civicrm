@@ -1,0 +1,45 @@
+
+
+- name: Provisioning | Copy CiviCRM Database Bakup File Onto Server
+  copy:
+    src: "{{civicrm_backup_file}}"
+    dest: /tmp
+  when: civicrm_backup_file is defined
+  tags:
+  - civicrm_db_restore
+
+- name: Provisioning | Restore CiviCRM Database From Backup
+  become: yes
+  become_method: sudo
+  mysql_db: 
+    name: "{{civicrm_database}}"
+    state: import
+    target: "/tmp/{{civicrm_backup_file}}"
+    login_user: "{{mysql_user}}"
+    login_password: "{{mysql_password}}"
+    config_file: /etc/mysql/my.cnf
+  when: civicrm_backup_file is defined
+  tags:
+  - civicrm_db_restore
+
+- name: Provisioning | Copy Wordpress Database Bakup File Onto Server
+  copy:
+    src: "{{wordpress_backup_file}}"
+    dest: /tmp
+  when: wordpress_backup_file is defined
+  tags:
+  - wordpress_db_restore
+
+- name: Provisioning | Create the wordpress database
+  sudo: yes
+  mysql_db: 
+    name: "{{wordpress_database}}"
+    state: import 
+    target: "/tmp/{{wordpress_backup_file}}"
+    login_user: "{{mysql_user}}"
+    login_password: "{{mysql_password}}"
+    config_file: /etc/mysql/my.cnf
+  tags:
+  - wordpress_db_restore
+
+
